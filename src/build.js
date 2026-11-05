@@ -1,6 +1,6 @@
 // Turns the specification into the files consumers import from dist/.
 
-import { WORD_CATEGORIES } from './spec.js';
+import { WORD_CATEGORIES, deprecatedWordsOf } from './spec.js';
 import { buildTextMateGrammar } from './textmate.js';
 
 export const DIST_DIR = new URL('../dist/', import.meta.url);
@@ -23,6 +23,11 @@ function tupleType(list) {
   return `readonly [${list.map((item) => JSON.stringify(item)).join(', ')}]`;
 }
 
+function recordType(record) {
+  const fields = Object.entries(record).map(([key, value]) => `readonly ${key}: ${JSON.stringify(value)}`);
+  return `{ ${fields.join('; ')} }`;
+}
+
 function buildModule(spec) {
   const { line, block } = spec.comments;
   const lines = [
@@ -32,6 +37,8 @@ function buildModule(spec) {
     `export const scopeName = ${JSON.stringify(spec.scopeName)};`,
     `export const comments = Object.freeze({ line: ${JSON.stringify(line)}, block: ${frozenList(block)} });`,
     ...Object.entries(exportedLists(spec)).map(([name, list]) => `export const ${name} = ${frozenList(list)};`),
+    '// Old spellings that still compile, with a warning, mapped to their replacement.',
+    `export const deprecatedWords = Object.freeze(${JSON.stringify(deprecatedWordsOf(spec))});`,
   ];
   return `${lines.join('\n')}\n`;
 }
@@ -45,6 +52,7 @@ function buildTypes(spec) {
     `export declare const scopeName: ${JSON.stringify(spec.scopeName)};`,
     `export declare const comments: { readonly line: ${JSON.stringify(line)}; readonly block: ${tupleType(block)} };`,
     ...Object.entries(exportedLists(spec)).map(([name, list]) => `export declare const ${name}: ${tupleType(list)};`),
+    `export declare const deprecatedWords: ${recordType(deprecatedWordsOf(spec))};`,
   ];
   return `${lines.join('\n')}\n`;
 }

@@ -2,12 +2,14 @@
 // specification can be checked against them. The compiler is the source of
 // truth: when they differ, the specification is the one to fix.
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { deprecatedWordsOf, highlightedWords } from './spec.js';
 
 const SCANNER_PATH = 'rules/scanner.l';
 const SEMA_PATH = 'src/kriol/sema.cc';
 const PRELUDE_PATH = 'include/kriol/prelude.hh';
+const DEPRECATED_PATH = 'include/kriol/deprecated.hh';
 
 // A scanner rule for a fixed word, such as: "int"  SAVE_TOKEN; return TYPE_INT;
 const SCANNER_WORD_RULE = /^"([A-Za-z_][A-Za-z0-9_]*)"\s+(.*)$/;
@@ -44,13 +46,24 @@ export function parsePrelude(prelude) {
   return { builtinFunctions, preludeTypes };
 }
 
+// The renamed words, as old name mapped to current name: {"sinon", "sinau"}.
+export function parseDeprecatedWords(deprecated) {
+  const table = deprecated.match(/RenamedWords\[\]\s*=\s*\{([\s\S]*?)\n\};/);
+  if (!table) return {};
+  return Object.fromEntries(
+    [...table[1].matchAll(/\{\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\}/g)].map(([, oldName, currentName]) => [oldName, currentName]),
+  );
+}
+
 export function readCompilerWords(compilerDir) {
   const read = (path) => readFileSync(join(compilerDir, path), 'utf8');
+  const deprecatedPath = join(compilerDir, DEPRECATED_PATH);
 
   return {
     ...parseScannerWords(read(SCANNER_PATH)),
     reserved: parseReservedWords(read(SEMA_PATH)),
     ...parsePrelude(read(PRELUDE_PATH)),
+    deprecatedWords: existsSync(deprecatedPath) ? parseDeprecatedWords(read(DEPRECATED_PATH)) : {},
   };
 }
 
@@ -66,10 +79,17 @@ function differences(label, inSpec, inCompiler) {
   ];
 }
 
+const renamings = (deprecatedWords) =>
+  Object.entries(deprecatedWords ?? {}).map(([oldName, currentName]) => `${oldName} -> ${currentName}`);
+
 // Every difference between the specification and the compiler; empty when they agree.
+// The scanner still reads the old spelling of a renamed keyword, so it counts as a keyword.
 export function compareWithCompiler(spec, compiler) {
-  const { declarationKeywords, controlKeywords, builtinTypes, booleans, builtinFunctions, preludeTypes } = spec.words;
-  const keywords = [...declarationKeywords, ...controlKeywords];
+  const { builtinTypes, booleans, builtinFunctions, preludeTypes } = spec.words;
+  const keywords = [
+    ...highlightedWords(spec, 'declarationKeywords'),
+    ...highlightedWords(spec, 'controlKeywords'),
+  ];
 
   return [
     ...differences('keywords', keywords, compiler.keywords),
@@ -78,5 +98,6 @@ export function compareWithCompiler(spec, compiler) {
     ...differences('reserved words', [...keywords, ...builtinTypes, ...booleans], compiler.reserved),
     ...differences('builtinFunctions', builtinFunctions, compiler.builtinFunctions),
     ...differences('preludeTypes', preludeTypes, compiler.preludeTypes),
+    ...differences('deprecatedWords', renamings(deprecatedWordsOf(spec)), renamings(compiler.deprecatedWords)),
   ];
 }
