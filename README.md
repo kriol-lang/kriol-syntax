@@ -33,7 +33,7 @@ import grammar from 'kriol-syntax/kriol.tmLanguage.json' with { type: 'json' };
 | `fileExtensions` | `kriol`, `kr` |
 | `comments` | `{ line: '//', block: ['/*', '*/'] }` |
 | `declarationKeywords` | `fn`, `molda`, `inpristan` |
-| `controlKeywords` | `si`, `sinon`, `pa`, `nkuantu`, `kebra`, `kontinua`, `divolvi`, `tenta`, `lansa` |
+| `controlKeywords` | `si`, `sinon`, `pa`, `nkuantu`, `kebra`, `kontinua`, `divolvi`, `tenta`, `lansa`, `spia`, `oops`, `sempri` |
 | `keywords` | both lists above |
 | `builtinTypes` | `num`, `int`, `bool`, `textu`, `i8` … `u64`, `f32`, `f64`, `isize`, `usize` |
 | `booleans` | `sin`, `nau` |
