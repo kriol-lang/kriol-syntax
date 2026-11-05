@@ -9,10 +9,14 @@
   },
   "words": {
     "declarationKeywords": ["fn", "molda", "inpristan"],
-    "controlKeywords": ["si", "sinon", "pa", "nkuantu", "kebra", "kontinua", "divolvi", "tenta", "lansa", "spia", "oops", "sempri"],
+    "controlKeywords": ["si", "sinau", "pa", "nkuantu", "kebra", "kontinua", "divolvi", "tenta", "lansa", "spia", "oops", "sempri"],
     "builtinTypes": ["num", "int", "bool", "textu", "i8", "i16", "i32", "i64", "u8", "u16", "u32", "u64", "f32", "f64", "isize", "usize"],
     "booleans": ["sin", "nau"],
-    "builtinFunctions": ["mostra", "mostran", "toma", "sai", "konfirma", "paniku"],
+    "builtinFunctions": ["mostra", "mostraln", "toma", "sai", "konfirma", "paniku"],
     "preludeTypes": ["Erru"]
+  },
+  "deprecatedWords": {
+    "sinon": "sinau",
+    "mostran": "mostraln"
   }
 }

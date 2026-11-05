@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadSpec } from '../src/spec.js';
+import { WORD_CATEGORIES, loadSpec } from '../src/spec.js';
 import { WORD_SCOPES, buildTextMateGrammar } from '../src/textmate.js';
 
 const spec = loadSpec();
@@ -40,6 +40,13 @@ for (const [category, scope] of Object.entries(WORD_SCOPES)) {
     }
   });
 }
+
+test('colours a deprecated word like the word that replaces it', () => {
+  for (const [oldName, replacement] of Object.entries(spec.deprecatedWords)) {
+    const category = WORD_CATEGORIES.find((name) => spec.words[name].includes(replacement));
+    assert.match(oldName, allMatchPatterns().get(WORD_SCOPES[category]), oldName);
+  }
+});
 
 test('does not colour the entry function inisiu as a keyword', () => {
   for (const [scope, pattern] of allMatchPatterns()) {

@@ -2,6 +2,8 @@
 // and GitHub. Only the word lists come from the specification; the rest
 // mirrors the scanner of the compiler (kriol/rules/scanner.l).
 
+import { highlightedWords } from './spec.js';
+
 export const WORD_SCOPES = Object.freeze({
   declarationKeywords: 'keyword.other.kriol',
   controlKeywords: 'keyword.control.kriol',
@@ -12,10 +14,11 @@ export const WORD_SCOPES = Object.freeze({
 });
 
 // The specification only allows identifiers, so the words need no escaping.
+// Old spellings still compile, so they are coloured like their replacement.
 function wordPattern(spec, category) {
   return {
     name: WORD_SCOPES[category],
-    match: `\\b(${spec.words[category].join('|')})\\b`,
+    match: `\\b(${highlightedWords(spec, category).join('|')})\\b`,
   };
 }
 
