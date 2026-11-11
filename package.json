@@ -1,6 +1,6 @@
 {
   "name": "kriol-syntax",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Single source of the KriolLang syntax: word lists and the TextMate grammar shared by every editor and site",
   "type": "module",
   "license": "MIT",
