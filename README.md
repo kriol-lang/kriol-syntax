@@ -10,7 +10,8 @@ words of the language (keywords, types, booleans and prelude functions) in
 | `dist/index.js` + `index.d.ts` | the word lists as frozen arrays | the playground (CodeMirror), the website |
 
 The compiler is the source of truth. A test reads its sources
-(`rules/scanner.l`, `src/kriol/sema.cc`, `include/kriol/prelude.hh`) and fails
+(`rules/scanner.l`, `src/kriol/sema.cc`, `include/kriol/prelude.hh`,
+`include/kriol/deprecated.hh`) and fails
 when they and `kriol-syntax.json` disagree.
 
 The tree-sitter grammar ([kriol-tree-sitter](https://github.com/kriol-lang/kriol-tree-sitter))
@@ -33,18 +34,26 @@ import grammar from 'kriol-syntax/kriol.tmLanguage.json' with { type: 'json' };
 | `fileExtensions` | `kriol`, `kr` |
 | `comments` | `{ line: '//', block: ['/*', '*/'] }` |
 | `declarationKeywords` | `fn`, `molda`, `inpristan` |
-| `controlKeywords` | `si`, `sinon`, `pa`, `nkuantu`, `kebra`, `kontinua`, `divolvi`, `tenta`, `lansa`, `spia`, `oops`, `sempri` |
+| `controlKeywords` | `si`, `sinon`, `pa`, `nkuantu`, `kebra`, `kontinua`, `divolvi`, `lansa`, `spia`, `oops`, `sempri` |
 | `keywords` | both lists above |
 | `builtinTypes` | `num`, `int`, `bool`, `textu`, `i8` … `u64`, `f32`, `f64`, `isize`, `usize` |
 | `booleans` | `sin`, `nau` |
-| `builtinFunctions` | `mostra`, `mostran`, `toma`, `sai`, `konfirma`, `paniku` |
+| `builtinFunctions` | `mostra`, `mostraln`, `toma`, `sai`, `konfirma`, `paniku` |
 | `preludeTypes` | `Erru` |
+| `deprecatedWords` | `{ mostran: 'mostraln' }` |
+
+`deprecatedWords` maps an old spelling to the word that replaced it. The
+compiler still accepts the old spelling and warns about it. The TextMate
+grammar colours it like its replacement. The word lists leave it out, so an
+editor that completes words from them only suggests the current spelling.
 
 ## Changing the language
 
 When the compiler gains or loses a word:
 
 1. Edit `kriol-syntax.json`.
+   To rename a word, put the new name in its list and map the old one to it
+   in `deprecatedWords` while the compiler still accepts it.
 2. Run `npm run build` to regenerate `dist/`. It is committed, so installing
    from git needs no build step.
 3. Run `npm test`. With the compiler checked out next to this repository

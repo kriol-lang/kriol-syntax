@@ -19,6 +19,7 @@ test('the module exports every word list of the specification', async () => {
   assert.deepEqual(kriol.keywords, [...spec.words.declarationKeywords, ...spec.words.controlKeywords]);
   assert.deepEqual(kriol.fileExtensions, spec.fileExtensions);
   assert.deepEqual(kriol.comments, spec.comments);
+  assert.deepEqual(kriol.deprecatedWords, spec.deprecatedWords);
 });
 
 test('the exported lists cannot be changed by a consumer', async () => {
@@ -26,11 +27,12 @@ test('the exported lists cannot be changed by a consumer', async () => {
 
   assert.ok(Object.isFrozen(kriol.controlKeywords));
   assert.ok(Object.isFrozen(kriol.comments.block));
+  assert.ok(Object.isFrozen(kriol.deprecatedWords));
 });
 
 test('the type declarations name every export', () => {
   const declarations = buildArtifacts(spec)['index.d.ts'];
 
-  for (const name of [...WORD_CATEGORIES, 'keywords', 'fileExtensions', 'comments', 'scopeName'])
+  for (const name of [...WORD_CATEGORIES, 'keywords', 'fileExtensions', 'comments', 'scopeName', 'deprecatedWords'])
     assert.match(declarations, new RegExp(`export declare const ${name}:`), name);
 });

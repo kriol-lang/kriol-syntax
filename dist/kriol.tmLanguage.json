@@ -118,7 +118,7 @@
       "patterns": [
         {
           "name": "keyword.control.kriol",
-          "match": "\\b(si|sinon|pa|nkuantu|kebra|kontinua|divolvi|tenta|lansa|spia|oops|sempri)\\b"
+          "match": "\\b(si|sinon|pa|nkuantu|kebra|kontinua|divolvi|lansa|spia|oops|sempri)\\b"
         },
         {
           "name": "keyword.other.kriol",
@@ -126,7 +126,7 @@
         },
         {
           "name": "support.function.kriol",
-          "match": "\\b(mostra|mostran|toma|sai|konfirma|paniku)\\b"
+          "match": "\\b(mostra|mostraln|toma|sai|konfirma|paniku|mostran)\\b"
         }
       ]
     },

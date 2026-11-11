@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   compareWithCompiler,
+  parseDeprecatedWords,
   parsePrelude,
   parseReservedWords,
   parseScannerWords,
@@ -40,6 +41,12 @@ inline Builtin lookupBuiltin(const std::string& name) {
 }
 `;
 
+const DEPRECATED = `
+inline constexpr RenamedWord RenamedWords[] = {
+    {"sinon", "si"},  // the keyword 'else'
+};
+`;
+
 const COMPILER_WORDS = {
   keywords: ['fn', 'si'],
   builtinTypes: ['int', 'i8'],
@@ -47,10 +54,12 @@ const COMPILER_WORDS = {
   reserved: ['si', 'fn', 'int', 'i8', 'sin'],
   builtinFunctions: ['mostra'],
   preludeTypes: ['Erru'],
+  deprecatedWords: {},
 };
 
-function specWith(words) {
+function specWith(words, deprecatedWords = {}) {
   return {
+    deprecatedWords,
     words: {
       declarationKeywords: ['fn'],
       controlKeywords: ['si'],
@@ -77,6 +86,29 @@ test('reads the reserved words of the semantic analyser', () => {
 
 test('reads the prelude functions and types', () => {
   assert.deepEqual(parsePrelude(PRELUDE), { builtinFunctions: ['mostra'], preludeTypes: ['Erru'] });
+});
+
+test('reads the renamed words of the compiler', () => {
+  assert.deepEqual(parseDeprecatedWords(DEPRECATED), { sinon: 'si' });
+});
+
+test('accepts an old keyword spelling that both deprecate', () => {
+  const compiler = {
+    ...COMPILER_WORDS,
+    keywords: ['fn', 'si', 'sinon'],
+    reserved: [...COMPILER_WORDS.reserved, 'sinon'],
+    deprecatedWords: { sinon: 'si' },
+  };
+
+  assert.deepEqual(compareWithCompiler(specWith({}, { sinon: 'si' }), compiler), []);
+});
+
+test('reports a deprecated word the specification lacks', () => {
+  const compiler = { ...COMPILER_WORDS, deprecatedWords: { mostran: 'mostra' } };
+
+  assert.deepEqual(compareWithCompiler(specWith({}), compiler), [
+    "deprecatedWords: 'mostran -> mostra' is in the compiler but not in the specification",
+  ]);
 });
 
 test('finds no difference when the specification matches the compiler', () => {
