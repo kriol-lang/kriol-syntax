@@ -87,6 +87,13 @@ test('the old spelling mostran is deprecated for mostraln', () => {
   assert.ok(spec.words.builtinFunctions.includes('mostraln'));
 });
 
+test('tenta is no longer a word of the language, spia replaced it', () => {
+  const spec = loadSpec();
+
+  assert.ok(!allWords(spec).includes('tenta'));
+  assert.ok(spec.words.controlKeywords.includes('spia'));
+});
+
 test('reports missing file extensions', () => {
   const spec = validSpec();
   spec.fileExtensions = [];
